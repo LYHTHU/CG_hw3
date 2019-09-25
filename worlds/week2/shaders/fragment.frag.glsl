@@ -36,7 +36,7 @@ struct Light{
 }; 
 
 Shape uShapes[NS];
-uniform Material uMaterials[NS];
+Material uMaterials[NS];
 Light lights[NL];
 
 
@@ -48,10 +48,9 @@ Ray get_ray(vec3 p_src, vec3 p_dest){
 }
 
 // Setting the parameters of uShapes and lights
-
 void init(){
     // x,  y:  - 2 ~ 2,  z: 0~4
-    state.uMaterialsLoc=[];
+    // state.uMaterialsLoc=[];
     // state.uMaterialsLoc[0]={};
     // state.uMaterialsLoc[0].diffuse=gl.getUniformLocation(program,'uMaterials[0].diffuse');
     // state.uMaterialsLoc[0].ambient=gl.getUniformLocation(program,'uMaterials[0].ambient');
@@ -62,12 +61,9 @@ void init(){
     // gl.uniform3fv(state.uMaterialsLoc[0].specular,[.5, .5, .5]);
     // gl.uniform1f(state.uMaterialsLoc[0].power, 20);
 
-    uShapes[0].center = vec3(.5, .5,  - 1.); 
+    uShapes[0].center = vec3(1., 0., -1.); 
     uShapes[0].r = .6; 
-
-
-    
-    uShapes[1].center = vec3( -.5, 1.2,  -.4); 
+    uShapes[1].center = vec3( -.5, 1.2, -.4); 
     uShapes[1].r = .7; 
 
     // state.uMaterialsLoc[1]={};
@@ -75,11 +71,22 @@ void init(){
     // gl.uniform3fv(state.uMaterialsLoc[1].diffuse,[.5,.5,0.]);
     // gl.uniform3fv(state.uMaterialsLoc[1].specular,[1.,1.,1.]);
     // gl.uniform1f(state.uMaterialsLoc[1].power, 20);
+
+    uMaterials[0].ambient=vec3(0.,.1,.1);
+    uMaterials[0].diffuse=vec3(0.,.5,.5);
+    uMaterials[0].specular=vec3(0.,1.,1.);// 4th value is specular power
+    uMaterials[0].power = 10.;
+
+    uMaterials[1].ambient=vec3(.1,.1,0.);
+    uMaterials[1].diffuse=vec3(.5,.5,0.);
+    uMaterials[1].specular=vec3(1.,1.,1.);
+    uMaterials[1].power=20.;
+
     
     lights[0].rgb = vec3(1., 1., 1.); 
-    lights[0].src = vec3(0., 2.*cos(uTime),  - .5); 
+    lights[0].src = vec3(1., 2.,  -.5); 
     lights[1].rgb = vec3(1., 1., 1.); 
-    lights[1].src = vec3( - 1.*sin(1.*uTime), 0.,  - 2.*sin(uTime)); 
+    lights[1].src = vec3(-1., 0., 1.); 
 }
 
 vec3 get_normal(Shape s, vec3 pos){
