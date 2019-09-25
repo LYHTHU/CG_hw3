@@ -399,6 +399,31 @@ vec3 ray_tracing(){
         }
 
         // First level refraction.
+        Ray ra = refract_out_ray(r_in, uShapes[index], uMaterials[index].refraction, idx_p);
+        vec3 ta;
+        float tmpa = 10001.;
+        float t_mina = 10000.; 
+        int idx_pa = -1;
+        int indexa = -1;
+        
+        for(int j = 0; j < NS; j++){
+            ta = intersect(ra, uShapes[j]); 
+            if (ta[1] >= ta[0]) {
+                if(ta[0] >= 0.){
+                    tmpa = ta[0];
+                    if(tmpa < t_mina) {
+                        t_mina = tmpa;
+                        indexa = j;
+                        idx_pa = int(ta[2]);
+                    }
+                }
+            }
+        }
+
+        if(indexr > -1) {
+            vec3 inter_point_a = ra.src + t_mina*ra.dir; 
+            color += uMaterials[index].transparent * phong(inter_point_a, indexa, idx_pa);
+        }
     }
     
     return color; 
