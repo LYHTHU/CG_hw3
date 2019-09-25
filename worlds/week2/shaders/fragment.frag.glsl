@@ -256,11 +256,15 @@ Ray reflect_ray(Ray rin, vec3 norm){
     return ret; 
 }
 
-Ray refract_ray(Ray rin, vec3 norm, float refract) {
+Ray refract_ray(Ray rin, vec3 norm, float refraction) {
     Ray ret; 
-    ret.src = rin.src; 
-    // Do some math
+    ret.src = rin.src + 0.00001 * norm;
+    vec3 wn = dot(rin.dir, norm) * norm;
+    vec3 ws = rin.dir - wn;
 
+    vec3 wsp = -ws / refraction;
+    vec3 wnp = -sqrt(1. - dot(wsp, wsp)) * norm;
+    ret.dir = vec3()
     return ret;
 }
 
