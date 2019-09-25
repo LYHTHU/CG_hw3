@@ -67,7 +67,7 @@ void init(){
     // gl.uniform3fv(state.uMaterialsLoc[0].specular,[.5, .5, .5]);
     // gl.uniform1f(state.uMaterialsLoc[0].power, 20);
 
-    uShapes[0].center = vec3(1.2, 0.5, -1.); 
+    uShapes[0].center = vec3(1.0*cos(2.*uTime), 1.0*sin(2.*uTime), -3.*sin(uTime)); 
     uShapes[0].r = .6; 
     uShapes[0].type=0;
 
@@ -113,7 +113,7 @@ void init(){
     uMaterials[0].ambient=vec3(0.,.1,.1);
     uMaterials[0].diffuse=vec3(0.,.5,.5);
     uMaterials[0].specular=vec3(0.,1.,1.);// 4th value is specular power
-    uMaterials[0].power = 10.;
+    uMaterials[0].power = 20.;
     uMaterials[0].reflectc = vec3(0.5,0.5,0.5);
     uMaterials[0].transparent = vec3(0.5,0.5,0.5);
     uMaterials[0].refraction = 1.5;
@@ -132,8 +132,8 @@ void init(){
     uMaterials[2].diffuse=vec3(.4,.1,0.3);
     uMaterials[2].specular=vec3(1.,1.,1.);
     uMaterials[2].power=20.;
-    uMaterials[2].reflectc=vec3(.4,.4,0.4);
-    uMaterials[2].transparent = vec3(.4,.4,0.4);
+    uMaterials[2].reflectc=vec3(0.4, 0.4, 0.4);
+    uMaterials[2].transparent = vec3(0.4, 0.4, 0.4);
     uMaterials[2].refraction=1.5;
 
 
@@ -405,7 +405,7 @@ vec3 ray_tracing(){
         float t_mina = 10000.; 
         int idx_pa = -1;
         int indexa = -1;
-        
+
         for(int j = 0; j < NS; j++){
             ta = intersect(ra, uShapes[j]); 
             if (ta[1] >= ta[0]) {
