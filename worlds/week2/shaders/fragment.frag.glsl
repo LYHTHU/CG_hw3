@@ -90,45 +90,73 @@ void init(){
 }
 
 vec3 get_normal(Shape s, vec3 pos){
-    if (s.type == 0) {
-        return normalize(pos - s.center); 
+    switch(s.type) {
+        case 0: 
+        // Sphere
+            return normalize(pos-s.center);
+            break;
+        case 1:
+        // Octahedron
+            return sign(pos - s.center);
+        default:
+            return normalize(pos-s.center);
+            break;
     }
+
 }
 
 float intersect(Ray r,  Shape s){
-    float t; 
-    // d  =  direction of ray,  s  =  source of ray,  c  =  center of shape
-    vec3 c_s = s.center - r.src; 
-    float dc_s = dot(r.dir, c_s); 
-    float d2 = dot(r.dir, r.dir); // should be 1
-    float r2 = s.r*s.r; 
-    float delta = pow(dc_s, 2.) - d2*(dot(c_s, c_s) - r2); 
-    if(delta < 0.){
-        // no intersect
-        return - 1.; 
+    switch(s.type)
+    {
+        case 0: 
+        // Sphere
+            float t; 
+            // d  =  direction of ray,  s  =  source of ray,  c  =  center of shape
+            vec3 c_s = s.center - r.src; 
+            float dc_s = dot(r.dir, c_s); 
+            float d2 = dot(r.dir, r.dir); // should be 1
+            float r2 = s.r*s.r; 
+            float delta = pow(dc_s, 2.) - d2*(dot(c_s, c_s) - r2); 
+            if(delta < 0.){
+                // no intersect
+                return - 1.; 
+            }
+            else if(delta > eps){
+                // two intersect
+                float t1 = (dc_s - sqrt(delta))/d2; 
+                float t2 = (dc_s + sqrt(delta))/d2; 
+                if(t1 > 0.){
+                    return t1; 
+                }
+                else{// maybe inside the shape
+                    return - 1.; 
+                }
+            }
+            else{
+                // one intersect
+                t = dc_s/d2; 
+                return t; 
+            }
+            break;
+        case 1:
+        // Polyhedron
+            break;
     }
-    else if(delta > eps){
-        // two intersect
-        float t1 = (dc_s - sqrt(delta))/d2; 
-        float t2 = (dc_s + sqrt(delta))/d2; 
-        if(t1 > 0.){
-            return t1; 
-        }
-        else{// maybe inside the shape
-            return - 1.; 
-        }
-    }
-    else{
-        // one intersect
-        t = dc_s/d2; 
-        return t; 
+}
+
+bool inside(vec3 point, Shape s) {
+    switch (s.type) {
+        case 0:
+            return length(point - s.center) < s.r;
+        case 1:
+            break;
     }
 }
 
 bool hidden_by_shape(Light l){
     Ray ray = get_ray(eye, l.src); 
     for(int i = 0; i < NS; i++){
-        if(dot(l.src - uShapes[i].center, l.src - uShapes[i].center) < pow(uShapes[i].r, 2.)){
+        if(inside(l.src, uShapes[i])){
             return true; 
         }
         
