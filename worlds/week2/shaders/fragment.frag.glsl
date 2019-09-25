@@ -6,7 +6,7 @@ in vec3 vPos; // POSITION IN IMAGE
 out vec4 fragColor; // RESULT WILL GO HERE
 
 const int NS = 3; // Number of uShapes in the scene
-const int NL = 2; // Number of light sources in the scene
+const int NL = 3; // Number of light sources in the scene
 const float eps = 1.e-7; 
 const vec3 eye = vec3(0., 0., 5.); 
 const vec3 screen_center = vec3(0., 0., 2.5); 
@@ -76,8 +76,7 @@ void init(){
     uShapes[1].type=0;
  
 
-    // uShapes[2].center = vec3(+0.5, +1.2, 0.3);
-    uShapes[2].center=vec3(0., 0., 0.);
+    uShapes[2].center = vec3(-1.*sin(3.*uTime), -0.1, -1.*cos(uTime));
     uShapes[2].r=0.05;
     uShapes[2].n_p = 8;
     uShapes[2].type = 1;
@@ -85,11 +84,6 @@ void init(){
     float r3 = 1./sqrt(3.);
 
     float r = uShapes[2].r;
-
-    // mat4 inv_A = mat4(1.);
-    // inv_A[3][0] = -uShapes[2].center.x;
-    // inv_A[3][1] = -uShapes[2].center.y;
-    // inv_A[3][2] = -uShapes[2].center.z;
 
     uShapes[2].plane[0] = vec4(-r3,-r3,-r3,-r);
     uShapes[2].plane[1] = vec4(-r3,-r3,+r3,-r);
@@ -99,10 +93,6 @@ void init(){
     uShapes[2].plane[5] = vec4(+r3,-r3,+r3,-r);
     uShapes[2].plane[6] = vec4(+r3,+r3,-r3,-r);
     uShapes[2].plane[7] = vec4(+r3,+r3,+r3,-r);
-
-    for (int i = 0; i < uShapes[2].n_p; i++) {
-        uShapes[2].plane[i][3] -= dot(uShapes[2].plane[i].xyz, uShapes[2].center);
-    }
 
     // state.uMaterialsLoc[1]={};
     // gl.uniform3fv(state.uMaterialsLoc[1].ambient,[.1,.1,0.]);
@@ -141,6 +131,8 @@ void init(){
     lights[0].src = vec3(2.*sin(uTime), 2.*cos(uTime), -.5); 
     lights[1].rgb = vec3(1., 1., 1.); 
     lights[1].src = vec3(-1.5*cos(uTime), 0., 1.5*sin(uTime)); 
+    lights[2].rgb = vec3(1., 1., 1.); 
+    lights[2].src = vec3(0., 1.*cos(uTime), 1.*sin(uTime));
 }
 
 vec3 get_normal(Shape s, vec3 pos, int idx){
@@ -163,6 +155,8 @@ vec3 get_normal(Shape s, vec3 pos, int idx){
 vec3 intersect(Ray r,  Shape s){
     float t;
     float idx = -1.; 
+    r.src = r.src - s.center;
+    s.center = vec3(0., 0., 0.);
     switch(s.type)
     {
         case 0: 
