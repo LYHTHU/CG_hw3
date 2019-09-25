@@ -264,7 +264,28 @@ Ray refract_ray(Ray rin, vec3 norm, float refraction) {
 
     vec3 wsp = -ws / refraction;
     vec3 wnp = -sqrt(1. - dot(wsp, wsp)) * norm;
-    ret.dir = vec3()
+    ret.dir = wsp + wnp;
+    return ret;
+}
+
+Ray refract_out_ray(Ray r, Shape s, float refraction, int idx_p) {
+    // 2 time refracion: in and out.
+    // input: ray shoot toward the surface(but reverse the direction, i.e., outward)
+    // output: ray outward the surface(keep the same direction)
+    vec3 norm = get_normal(s, r.src, idx_p);
+    Ray rin = refract_ray(r, norm, refraction);
+    vec3 t = intersect(rin, s);
+    Ray ret;
+    if (t[1] > t[0]) {
+        // has intersection
+        float t1 = t[1];
+        vec3 out_point = rin.src + t1*rin.dir;
+        vec3 norm2 = get_normal(s, out_point, int(t[2]));
+        Ray ro;
+        ro.src = out_point;
+        ro.dir = -rin.dir;
+        ret = refract_ray(ro, norm2, 1./refraction);
+    }
     return ret;
 }
 
