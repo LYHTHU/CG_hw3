@@ -161,6 +161,34 @@ bool is_in_shadow(vec3 pos, vec3 norm, Light light){
     return ret; 
 }
 
+// inter_point: the intersect point 
+// index: index of shape
+vec3 phong(vec3 inter_point, int index) {
+    vec3 N=get_normal(uShapes[index],inter_point);
+    vec3 color=uMaterials[index].ambient;
+    for(int j=0;j<NL;j++){
+        if(!is_in_shadow(inter_point,N,lights[j])){
+            Ray L = get_ray(inter_point,lights[j].src);
+            Ray E = get_ray(inter_point,eye);
+            Ray R = reflect_ray(L,N);
+            color += lights[j].rgb*(uMaterials[index].diffuse*max(0.,dot(N,L.dir)));
+            // That is where the bug is.
+            // Something in Pow. If specular  >  =  10.,  it will overflow.
+            // float s  =  max(0.,  pow(dot(E.dir,  R.dir),  uShapes[index].specular[3]) );
+            float s;
+            float er = dot(E.dir,R.dir);
+            if(er > 0.){
+                s = max(0.,exp(uMaterials[index].power*log(er)));
+            }
+            else{
+                s = 0.;
+            }
+            color += lights[j].rgb*uMaterials[index].specular*s;
+        }
+    }
+    return color;
+}
+
 vec3 ray_tracing(){
     vec3 color = vec3(0., 0., 0.); 
     Ray ray = get_ray(eye, screen_center + vec3(vPos.xy, 0)); 
@@ -185,30 +213,10 @@ vec3 ray_tracing(){
             }
         }
     }
+
     if(index >  - 1){
         vec3 inter_point = ray.src + t_min*ray.dir; 
-        vec3 N = get_normal(uShapes[index], inter_point); 
-        color = uMaterials[index].ambient; 
-        for(int j = 0; j < NL; j++){
-            if(!is_in_shadow(inter_point, N, lights[j])){
-                Ray L = get_ray(inter_point, lights[j].src); 
-                Ray E = get_ray(inter_point, eye); 
-                Ray R = reflect_ray(L, N); 
-                color += lights[j].rgb*(uMaterials[index].diffuse*max(0., dot(N, L.dir))); 
-                // That is where the bug is.
-                // Something in Pow. If specular  >  =  10.,  it will overflow.
-                // float s  =  max(0.,  pow(dot(E.dir,  R.dir),  uShapes[index].specular[3]) ); 
-                float s; 
-                float er = dot(E.dir, R.dir); 
-                if(er > 0.){
-                    s = max(0., exp(uMaterials[index].power*log(er))); 
-                }
-                else{
-                    s = 0.; 
-                }
-                color += lights[j].rgb * uMaterials[index].specular*s; 
-            }
-        }
+        color = phong(inter_point, index);
     }
     
     return color; 
