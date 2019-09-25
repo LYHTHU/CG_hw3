@@ -71,12 +71,12 @@ void init(){
     uShapes[0].r = .6; 
     uShapes[0].type=0;
 
-    uShapes[1].center = vec3( -.5, 1.2, -.4); 
+    uShapes[1].center = vec3( -.5, 1.2, -1.4); 
     uShapes[1].r = .7;
     uShapes[1].type=0;
  
 
-    uShapes[2].center = vec3(-1.*sin(3.*uTime), -0.1, -1.*cos(uTime));
+    uShapes[2].center = vec3(-1.*sin(2.*uTime), -0.1, -1.);
     uShapes[2].r=0.05;
     uShapes[2].n_p = 8;
     uShapes[2].type = 1;
