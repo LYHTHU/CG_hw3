@@ -73,7 +73,7 @@ void init(){
     uShapes[2].type=0;
  
 
-    // uShapes[2].center=vec3(-.5,-1.2,-.3);
+    // uShapes[2].center=vec3(-0.5,-1.2,-0.3);
     uShapes[2].center=vec3(0., 0., 0.);
     uShapes[2].r=0.05;
     uShapes[2].n_p = 8;
@@ -83,10 +83,10 @@ void init(){
 
     float r = uShapes[2].r;
 
-    mat4 inv_A = mat4(1.0);
-    inv_A[0][3] = -uShapes[2].center[0];
-    inv_A[1][3] = -uShapes[2].center[1];
-    inv_A[2][3] = -uShapes[2].center[2];
+    mat4 inv_A = mat4(1.);
+    inv_A[0][3] = -uShapes[2].center.x;
+    inv_A[1][3] = -uShapes[2].center.y;
+    inv_A[2][3] = -uShapes[2].center.z;
 
     uShapes[2].plane[0] = vec4(-r3,-r3,-r3,-r);
     uShapes[2].plane[1] = vec4(-r3,-r3,+r3,-r);
@@ -97,7 +97,9 @@ void init(){
     uShapes[2].plane[6] = vec4(+r3,+r3,-r3,-r);
     uShapes[2].plane[7] = vec4(+r3,+r3,+r3,-r);
 
-
+    for (int i = 0; i < uShapes[2].n_p; i++) {
+        uShapes[2].plane[i] = uShapes[2].plane[i] * inv_A;
+    }
 
     // state.uMaterialsLoc[1]={};
     // gl.uniform3fv(state.uMaterialsLoc[1].ambient,[.1,.1,0.]);
@@ -110,8 +112,8 @@ void init(){
     uMaterials[0].specular=vec3(0.,1.,1.);// 4th value is specular power
     uMaterials[0].power = 10.;
 
-    uMaterials[1].ambient=vec3(.1,.1,0.);
-    uMaterials[1].diffuse=vec3(.5,.5,0.);
+    uMaterials[1].ambient=vec3(0.0314, 0.098, 0.0);
+    uMaterials[1].diffuse=vec3(0.098, 0.498, 0.0);
     uMaterials[1].specular=vec3(1.,1.,1.);
     uMaterials[1].power=20.;
 
@@ -122,9 +124,9 @@ void init(){
 
     
     lights[0].rgb = vec3(1., 1., 1.); 
-    lights[0].src = vec3(1.*sin(uTime), 2.*cos(uTime), -.5); 
+    lights[0].src = vec3(2.*sin(uTime), 2.*cos(uTime), -.5); 
     lights[1].rgb = vec3(1., 1., 1.); 
-    lights[1].src = vec3(-1.*cos(uTime), 0., 1.*sin(uTime)); 
+    lights[1].src = vec3(-1.5*cos(uTime), 0., 1.5*sin(uTime)); 
 }
 
 vec3 get_normal(Shape s, vec3 pos){
@@ -135,7 +137,8 @@ vec3 get_normal(Shape s, vec3 pos){
             break;
         case 1:
         // Octahedron
-            return sign(pos - s.center);
+            // mat3 rotate = mat3(cos(uTime), 0., -sin(uTime), 0., 1., 0., sin(uTime), 0., cos(uTime));
+            return normalize(sign(pos - s.center));
         default:
             return normalize(pos-s.center);
             break;
@@ -171,7 +174,7 @@ vec2 intersect(Ray r,  Shape s){
                 return vec2(t, t); 
             }
             break;
-        case 1:
+        default:
         // Polyhedron
             // find the biggest t, when P*v > 0 at the begining
             float t_min = -10000., t_max = 10000.0;
