@@ -26,6 +26,7 @@ struct Material{
     vec3 diffuse; 
     vec3 specular; 
     float power;
+    vec3 reflectc;
 }; 
 
 struct Ray{
@@ -64,16 +65,16 @@ void init(){
     // gl.uniform3fv(state.uMaterialsLoc[0].specular,[.5, .5, .5]);
     // gl.uniform1f(state.uMaterialsLoc[0].power, 20);
 
-    uShapes[0].center = vec3(1., 0., -1.); 
+    uShapes[0].center = vec3(1.2, 0.5, -1.); 
     uShapes[0].r = .6; 
     uShapes[0].type=0;
 
     uShapes[1].center = vec3( -.5, 1.2, -.4); 
     uShapes[1].r = .7;
-    uShapes[2].type=0;
+    uShapes[1].type=0;
  
 
-    // uShapes[2].center=vec3(-0.5,-1.2,-0.3);
+    // uShapes[2].center = vec3(+0.5, +1.2, 0.3);
     uShapes[2].center=vec3(0., 0., 0.);
     uShapes[2].r=0.05;
     uShapes[2].n_p = 8;
@@ -83,10 +84,10 @@ void init(){
 
     float r = uShapes[2].r;
 
-    mat4 inv_A = mat4(1.);
-    inv_A[0][3] = -uShapes[2].center.x;
-    inv_A[1][3] = -uShapes[2].center.y;
-    inv_A[2][3] = -uShapes[2].center.z;
+    // mat4 inv_A = mat4(1.);
+    // inv_A[3][0] = -uShapes[2].center.x;
+    // inv_A[3][1] = -uShapes[2].center.y;
+    // inv_A[3][2] = -uShapes[2].center.z;
 
     uShapes[2].plane[0] = vec4(-r3,-r3,-r3,-r);
     uShapes[2].plane[1] = vec4(-r3,-r3,+r3,-r);
@@ -98,7 +99,7 @@ void init(){
     uShapes[2].plane[7] = vec4(+r3,+r3,+r3,-r);
 
     for (int i = 0; i < uShapes[2].n_p; i++) {
-        uShapes[2].plane[i] = uShapes[2].plane[i] * inv_A;
+        uShapes[2].plane[i][3] -= dot(uShapes[2].plane[i].xyz, uShapes[2].center);
     }
 
     // state.uMaterialsLoc[1]={};
@@ -111,16 +112,19 @@ void init(){
     uMaterials[0].diffuse=vec3(0.,.5,.5);
     uMaterials[0].specular=vec3(0.,1.,1.);// 4th value is specular power
     uMaterials[0].power = 10.;
+    uMaterials[0].reflectc = vec3(0.5,0.5,0.5);
 
     uMaterials[1].ambient=vec3(0.0314, 0.098, 0.0);
     uMaterials[1].diffuse=vec3(0.098, 0.498, 0.0);
     uMaterials[1].specular=vec3(1.,1.,1.);
     uMaterials[1].power=20.;
+    uMaterials[1].reflectc=vec3(0.5, 0.5, 0.5);
 
     uMaterials[2].ambient=vec3(.1,.1,0.);
     uMaterials[2].diffuse=vec3(.4,.1,0.3);
     uMaterials[2].specular=vec3(1.,1.,1.);
     uMaterials[2].power=20.;
+    uMaterials[2].reflectc=vec3(.4,.4,0.4);
 
     
     lights[0].rgb = vec3(1., 1., 1.); 
@@ -129,29 +133,31 @@ void init(){
     lights[1].src = vec3(-1.5*cos(uTime), 0., 1.5*sin(uTime)); 
 }
 
-vec3 get_normal(Shape s, vec3 pos){
+vec3 get_normal(Shape s, vec3 pos, int idx){
     switch(s.type) {
         case 0: 
         // Sphere
             return normalize(pos-s.center);
             break;
-        case 1:
+        // case 1:
         // Octahedron
-            // mat3 rotate = mat3(cos(uTime), 0., -sin(uTime), 0., 1., 0., sin(uTime), 0., cos(uTime));
-            return normalize(sign(pos - s.center));
+            // return normalize(sign(pos - s.center));
         default:
-            return normalize(pos-s.center);
+            // return normalize(pos-s.center);
+            return s.plane[idx].xyz;
             break;
     }
 
 }
 
-vec2 intersect(Ray r,  Shape s){
+vec3 intersect(Ray r,  Shape s){
+    float t;
+    float idx = -1.; 
     switch(s.type)
     {
         case 0: 
         // Sphere
-            float t; 
+            
             // d  =  direction of ray,  s  =  source of ray,  c  =  center of shape
             vec3 c_s = s.center - r.src; 
             float dc_s = dot(r.dir, c_s); 
@@ -160,22 +166,22 @@ vec2 intersect(Ray r,  Shape s){
             float delta = pow(dc_s, 2.) - d2*(dot(c_s, c_s) - r2); 
             if(delta < 0.){
                 // no intersect
-                return vec2(-1., -2.); 
+                return vec3(-1., -2., idx); 
             }
             else if(delta > eps){
                 // two intersect
                 float t1 = (dc_s - sqrt(delta))/d2; 
                 float t2 = (dc_s + sqrt(delta))/d2; 
-                return vec2(t1,t2);
+                return vec3(t1, t2, idx);
             }
             else{
                 // one intersect
                 t = dc_s/d2; 
-                return vec2(t, t); 
+                return vec3(t, t, idx); 
             }
             break;
         default:
-        // Polyhedron
+        // All Polyhedron
             // find the biggest t, when P*v > 0 at the begining
             float t_min = -10000., t_max = 10000.0;
             float p_src = 0., p_dir = 0.;
@@ -187,6 +193,7 @@ vec2 intersect(Ray r,  Shape s){
                         t = -p_src / p_dir;
                         if (t > t_min) {
                             t_min = t;
+                            idx = float(i);
                         }
                     }
                     else {
@@ -198,7 +205,7 @@ vec2 intersect(Ray r,  Shape s){
                     }
                 }
             }
-            return vec2(t_min, t_max);
+            return vec3(t_min, t_max, idx);
     }
 }
 
@@ -206,13 +213,13 @@ bool inside(vec3 point, Shape s) {
     switch (s.type) {
         case 0:
             return length(point - s.center) < s.r;
-        case 1:
-        for (int i = 0; i < s.n_p; i++) {
-            if (dot(s.plane[i], vec4(point, 1)) > 0.) {
-                return false;
+        default:
+            for (int i = 0; i < s.n_p; i++) {
+                if (dot(s.plane[i], vec4(point, 1)) > 0.) {
+                    return false;
+                }
             }
-        }
-        return true;
+            return true;
     }
 }
 
@@ -223,7 +230,7 @@ bool hidden_by_shape(Light l){
             return true; 
         }
         
-        vec2 t = intersect(ray, uShapes[i]); 
+        vec3 t = intersect(ray, uShapes[i]); 
         if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
             return true; 
         }
@@ -245,7 +252,7 @@ bool is_in_shadow(vec3 pos, vec3 norm, Light light){
     bool ret = false; 
     Ray ray_l = get_ray(pos, light.src); 
     for(int j = 0; j < NS; j++){
-        vec2 t = intersect(ray_l,uShapes[j]);
+        vec3 t = intersect(ray_l, uShapes[j]);
         if(t[1] > t[0] && t[0] > 0.){
             return true; 
         }
@@ -255,8 +262,8 @@ bool is_in_shadow(vec3 pos, vec3 norm, Light light){
 
 // inter_point: the intersect point 
 // index: index of shape
-vec3 phong(vec3 inter_point, int index) {
-    vec3 N=get_normal(uShapes[index],inter_point);
+vec3 phong(vec3 inter_point, int index, int idx_p) {
+    vec3 N=get_normal(uShapes[index], inter_point, idx_p);
     vec3 color=uMaterials[index].ambient;
     for(int j=0;j<NL;j++){
         if(!is_in_shadow(inter_point,N,lights[j])){
@@ -294,31 +301,64 @@ vec3 ray_tracing(){
     }
     
     float t_min = 10000.; 
-    int index =  - 1; 
-    
+    int index =  -1; 
+    int idx_p = -1;
+    vec3 t;
+    float tmp = 10000.;
     for(int i = 0; i < NS; i++){
-        vec2 t = intersect(ray, uShapes[i]); 
-
+        t = intersect(ray, uShapes[i]); 
         if (t[1] >= t[0]) {
             if(t[0] >= 0.){
-
-                if(t[0] < t_min){
-                    t_min=t[0];
-                    index=i;
-                }
+                tmp = t[0];
             }
-            else {
-                if(t[1] < t_min){
-                    t_min = t[1];
-                    index = i;
-                }
+            if(tmp < t_min) {
+                t_min = tmp;
+                index = i;
+                idx_p = int(t[2]);
             }
         }
     }
 
     if(index >  - 1){
-        vec3 inter_point = ray.src + t_min*ray.dir; 
-        color = phong(inter_point, index);
+        // find the first intersect
+        vec3 inter_point = ray.src + t_min*ray.dir;
+        color = phong(inter_point, index, idx_p);
+
+
+        // find the first level reflection
+        vec3 N = get_normal(uShapes[index], inter_point, idx_p);
+        Ray r_in;
+        r_in.dir = -ray.dir;
+        r_in.src = inter_point + N*0.00001;
+        Ray r_out = reflect_ray(r_in, N);
+
+        vec3 tr;
+        float tmpr = 10001.;
+        float t_minr = 10000.; 
+        int idx_pr = -1;
+        int indexr = -1;
+        for(int j = 0; j < NS; j++){
+            tr = intersect(r_out, uShapes[j]); 
+            if (tr[1] >= tr[0]) {
+                if(tr[0] >= 0.){
+                    tmpr = tr[0];
+                    if(tmpr < t_minr) {
+                        t_minr = tmpr;
+                        indexr = j;
+                        idx_pr = int(tr[2]);
+                    }
+                }
+
+                
+            }
+        }
+
+        
+            
+        if(indexr > -1) {
+            vec3 inter_point_r = r_out.src + t_minr*r_out.dir; 
+            color += uMaterials[index].reflectc * phong(inter_point_r, indexr, idx_pr);
+        }
     }
     
     return color; 
