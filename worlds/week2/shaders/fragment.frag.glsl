@@ -122,9 +122,9 @@ void init(){
 
     
     lights[0].rgb = vec3(1., 1., 1.); 
-    lights[0].src = vec3(1., 2., -.5); 
+    lights[0].src = vec3(1.*sin(uTime), 2.*cos(uTime), -.5); 
     lights[1].rgb = vec3(1., 1., 1.); 
-    lights[1].src = vec3(-1., 0., 1.); 
+    lights[1].src = vec3(-1.*cos(uTime), 0., 1.*sin(uTime)); 
 }
 
 vec3 get_normal(Shape s, vec3 pos){
@@ -205,11 +205,11 @@ bool inside(vec3 point, Shape s) {
             return length(point - s.center) < s.r;
         case 1:
         for (int i = 0; i < s.n_p; i++) {
-            if (dot(s.plane[i], vec4(point, 1)) < 0.) {
-                return true;
+            if (dot(s.plane[i], vec4(point, 1)) > 0.) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
 
