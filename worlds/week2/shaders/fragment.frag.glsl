@@ -284,7 +284,7 @@ Ray refract_out_ray(Ray r, Shape s, float refraction, int idx_p) {
         Ray ro;
         ro.src = out_point;
         ro.dir = -rin.dir;
-        ret = refract_ray(ro, norm2, 1./refraction);
+        ret = refract_ray(ro, -norm2, 1./refraction);
     }
     return ret;
 }
@@ -420,7 +420,7 @@ vec3 ray_tracing(){
             }
         }
 
-        if(indexr > -1) {
+        if(indexa > -1) {
             vec3 inter_point_a = ra.src + t_mina*ra.dir; 
             color += uMaterials[index].transparent * phong(inter_point_a, indexa, idx_pa);
         }
