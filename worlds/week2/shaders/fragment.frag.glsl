@@ -204,7 +204,12 @@ bool inside(vec3 point, Shape s) {
         case 0:
             return length(point - s.center) < s.r;
         case 1:
-            return false;
+        for (int i = 0; i < s.n_p; i++) {
+            if (dot(s.plane[i], vec4(point, 1)) < 0.) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
