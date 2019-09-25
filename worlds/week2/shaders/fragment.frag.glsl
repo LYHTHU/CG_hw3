@@ -27,6 +27,8 @@ struct Material{
     vec3 specular; 
     float power;
     vec3 reflectc;
+    float refraction;
+    vec3 transparent;
 }; 
 
 struct Ray{
@@ -113,20 +115,28 @@ void init(){
     uMaterials[0].specular=vec3(0.,1.,1.);// 4th value is specular power
     uMaterials[0].power = 10.;
     uMaterials[0].reflectc = vec3(0.5,0.5,0.5);
+    uMaterials[0].transparent = vec3(0.5,0.5,0.5);
+    uMaterials[0].refraction = 1.5;
+
 
     uMaterials[1].ambient=vec3(0.0314, 0.098, 0.0);
     uMaterials[1].diffuse=vec3(0.098, 0.498, 0.0);
     uMaterials[1].specular=vec3(1.,1.,1.);
     uMaterials[1].power=20.;
-    uMaterials[1].reflectc=vec3(0.5, 0.5, 0.5);
+    uMaterials[1].reflectc =vec3(0.5, 0.5, 0.5);
+    uMaterials[1].transparent = vec3(0.5, 0.5, 0.5);
+    uMaterials[1].refraction = 1.5;
+
 
     uMaterials[2].ambient=vec3(.1,.1,0.);
     uMaterials[2].diffuse=vec3(.4,.1,0.3);
     uMaterials[2].specular=vec3(1.,1.,1.);
     uMaterials[2].power=20.;
     uMaterials[2].reflectc=vec3(.4,.4,0.4);
+    uMaterials[2].transparent = vec3(.4,.4,0.4);
+    uMaterials[2].refraction=1.5;
 
-    
+
     lights[0].rgb = vec3(1., 1., 1.); 
     lights[0].src = vec3(2.*sin(uTime), 2.*cos(uTime), -.5); 
     lights[1].rgb = vec3(1., 1., 1.); 
@@ -246,6 +256,14 @@ Ray reflect_ray(Ray rin, vec3 norm){
     return ret; 
 }
 
+Ray refract_ray(Ray rin, vec3 norm, float refract) {
+    Ray ret; 
+    ret.src = rin.src; 
+    // Do some math
+
+    return ret;
+}
+
 bool is_in_shadow(vec3 pos, vec3 norm, Light light){
     
     pos = pos + .0001*norm; 
@@ -324,14 +342,13 @@ vec3 ray_tracing(){
         vec3 inter_point = ray.src + t_min*ray.dir;
         color = phong(inter_point, index, idx_p);
 
-
-        // find the first level reflection
         vec3 N = get_normal(uShapes[index], inter_point, idx_p);
         Ray r_in;
         r_in.dir = -ray.dir;
         r_in.src = inter_point + N*0.00001;
-        Ray r_out = reflect_ray(r_in, N);
 
+        // First level reflection.
+        Ray r_out = reflect_ray(r_in, N);
         vec3 tr;
         float tmpr = 10001.;
         float t_minr = 10000.; 
@@ -348,17 +365,15 @@ vec3 ray_tracing(){
                         idx_pr = int(tr[2]);
                     }
                 }
-
-                
             }
         }
-
-        
             
         if(indexr > -1) {
             vec3 inter_point_r = r_out.src + t_minr*r_out.dir; 
             color += uMaterials[index].reflectc * phong(inter_point_r, indexr, idx_pr);
         }
+
+        // First level refraction.
     }
     
     return color; 
