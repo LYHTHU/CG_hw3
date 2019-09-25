@@ -5,7 +5,7 @@ uniform float uTime; // TIME,  IN SECONDS
 in vec3 vPos; // POSITION IN IMAGE
 out vec4 fragColor; // RESULT WILL GO HERE
 
-const int NS = 2; // Number of uShapes in the scene
+const int NS = 3; // Number of uShapes in the scene
 const int NL = 2; // Number of light sources in the scene
 const float eps = 1.e-7; 
 const vec3 eye = vec3(0., 0., 5.); 
@@ -15,6 +15,9 @@ struct Shape{
     int type;
     vec3 center;
     float r;
+
+    int n_p;
+    vec4 plane[10];
 };
 
 
@@ -63,8 +66,38 @@ void init(){
 
     uShapes[0].center = vec3(1., 0., -1.); 
     uShapes[0].r = .6; 
+    uShapes[0].type=0;
+
     uShapes[1].center = vec3( -.5, 1.2, -.4); 
-    uShapes[1].r = .7; 
+    uShapes[1].r = .7;
+    uShapes[2].type=0;
+ 
+
+    // uShapes[2].center=vec3(-.5,-1.2,-.3);
+    uShapes[2].center=vec3(0., 0., 0.);
+    uShapes[2].r=0.05;
+    uShapes[2].n_p = 8;
+    uShapes[2].type = 1;
+
+    float r3 = 1./sqrt(3.);
+
+    float r = uShapes[2].r;
+
+    mat4 inv_A = mat4(1.0);
+    inv_A[0][3] = -uShapes[2].center[0];
+    inv_A[1][3] = -uShapes[2].center[1];
+    inv_A[2][3] = -uShapes[2].center[2];
+
+    uShapes[2].plane[0] = vec4(-r3,-r3,-r3,-r);
+    uShapes[2].plane[1] = vec4(-r3,-r3,+r3,-r);
+    uShapes[2].plane[2] = vec4(-r3,+r3,-r3,-r);
+    uShapes[2].plane[3] = vec4(-r3,+r3,+r3,-r);
+    uShapes[2].plane[4] = vec4(+r3,-r3,-r3,-r);
+    uShapes[2].plane[5] = vec4(+r3,-r3,+r3,-r);
+    uShapes[2].plane[6] = vec4(+r3,+r3,-r3,-r);
+    uShapes[2].plane[7] = vec4(+r3,+r3,+r3,-r);
+
+
 
     // state.uMaterialsLoc[1]={};
     // gl.uniform3fv(state.uMaterialsLoc[1].ambient,[.1,.1,0.]);
@@ -82,9 +115,14 @@ void init(){
     uMaterials[1].specular=vec3(1.,1.,1.);
     uMaterials[1].power=20.;
 
+    uMaterials[2].ambient=vec3(.1,.1,0.);
+    uMaterials[2].diffuse=vec3(.4,.1,0.3);
+    uMaterials[2].specular=vec3(1.,1.,1.);
+    uMaterials[2].power=20.;
+
     
     lights[0].rgb = vec3(1., 1., 1.); 
-    lights[0].src = vec3(1., 2.,  -.5); 
+    lights[0].src = vec3(1., 2., -.5); 
     lights[1].rgb = vec3(1., 1., 1.); 
     lights[1].src = vec3(-1., 0., 1.); 
 }
@@ -105,7 +143,7 @@ vec3 get_normal(Shape s, vec3 pos){
 
 }
 
-float intersect(Ray r,  Shape s){
+vec2 intersect(Ray r,  Shape s){
     switch(s.type)
     {
         case 0: 
@@ -119,28 +157,45 @@ float intersect(Ray r,  Shape s){
             float delta = pow(dc_s, 2.) - d2*(dot(c_s, c_s) - r2); 
             if(delta < 0.){
                 // no intersect
-                return - 1.; 
+                return vec2(-1., -2.); 
             }
             else if(delta > eps){
                 // two intersect
                 float t1 = (dc_s - sqrt(delta))/d2; 
                 float t2 = (dc_s + sqrt(delta))/d2; 
-                if(t1 > 0.){
-                    return t1; 
-                }
-                else{// maybe inside the shape
-                    return - 1.; 
-                }
+                return vec2(t1,t2);
             }
             else{
                 // one intersect
                 t = dc_s/d2; 
-                return t; 
+                return vec2(t, t); 
             }
             break;
         case 1:
         // Polyhedron
-            break;
+            // find the biggest t, when P*v > 0 at the begining
+            float t_min = -10000., t_max = 10000.0;
+            float p_src = 0., p_dir = 0.;
+            for (int i = 0; i < s.n_p; i++) {
+                p_dir = dot(vec4(r.dir, 1.), s.plane[i]);
+                p_src = dot(vec4(r.src, 1.), s.plane[i]);
+                if (p_dir != 0.) {
+                    if(p_src >= 0.) {
+                        t = -p_src / p_dir;
+                        if (t > t_min) {
+                            t_min = t;
+                        }
+                    }
+                    else {
+                        // < 0
+                        t=-p_src / p_dir;
+                        if(t < t_max){
+                            t_max = t;
+                        }
+                    }
+                }
+            }
+            return vec2(t_min, t_max);
     }
 }
 
@@ -149,7 +204,7 @@ bool inside(vec3 point, Shape s) {
         case 0:
             return length(point - s.center) < s.r;
         case 1:
-            break;
+            return false;
     }
 }
 
@@ -160,8 +215,8 @@ bool hidden_by_shape(Light l){
             return true; 
         }
         
-        float t = intersect(ray, uShapes[i]); 
-        if(t > 0. && t < length(l.src - eye)){
+        vec2 t = intersect(ray, uShapes[i]); 
+        if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
             return true; 
         }
         
@@ -182,7 +237,8 @@ bool is_in_shadow(vec3 pos, vec3 norm, Light light){
     bool ret = false; 
     Ray ray_l = get_ray(pos, light.src); 
     for(int j = 0; j < NS; j++){
-        if(intersect(ray_l, uShapes[j]) > .00001){
+        vec2 t = intersect(ray_l,uShapes[j]);
+        if(t[1] > t[0] && t[0] > 0.){
             return true; 
         }
     }
@@ -233,11 +289,21 @@ vec3 ray_tracing(){
     int index =  - 1; 
     
     for(int i = 0; i < NS; i++){
-        float t = intersect(ray, uShapes[i]); 
-        if(t > 0.){
-            if(t < t_min){
-                t_min = t; 
-                index = i; 
+        vec2 t = intersect(ray, uShapes[i]); 
+
+        if (t[1] >= t[0]) {
+            if(t[0] >= 0.){
+
+                if(t[0] < t_min){
+                    t_min=t[0];
+                    index=i;
+                }
+            }
+            else {
+                if(t[1] < t_min){
+                    t_min = t[1];
+                    index = i;
+                }
             }
         }
     }
