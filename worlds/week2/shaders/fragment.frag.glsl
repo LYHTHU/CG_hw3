@@ -5,7 +5,7 @@ uniform float uTime; // TIME,  IN SECONDS
 in vec3 vPos; // POSITION IN IMAGE
 out vec4 fragColor; // RESULT WILL GO HERE
 
-const int NS = 3; // Number of uShapes in the scene
+const int NS = 4; // Number of uShapes in the scene
 const int NL = 3; // Number of light sources in the scene
 const float eps = 1.e-7; 
 const vec3 eye = vec3(0., 0., 5.); 
@@ -81,6 +81,11 @@ void init(){
     uShapes[2].n_p = 8;
     uShapes[2].type = 1;
 
+    uShapes[3].center = vec3(-0.5, -0.5, 0.);
+    uShapes[3].r= 0.05;
+    uShapes[3].n_p = 8;
+    uShapes[3].type = 1;
+
     float r3 = 1./sqrt(3.);
 
     float r = uShapes[2].r;
@@ -93,6 +98,22 @@ void init(){
     uShapes[2].plane[5] = vec4(+r3,-r3,+r3,-r);
     uShapes[2].plane[6] = vec4(+r3,+r3,-r3,-r);
     uShapes[2].plane[7] = vec4(+r3,+r3,+r3,-r);
+
+    r = uShapes[3].r;
+    // uShapes[3].plane[0] = vec4(1.,0., 0., -r);
+    // uShapes[3].plane[1] = vec4(-1.,0., 0., -r);
+    // uShapes[3].plane[2] = vec4(0.,1., 0., -r);
+    // uShapes[3].plane[3] = vec4(0.,-1.,0., -r);
+    // uShapes[3].plane[4] = vec4(0., 0., 1., -r);
+    // uShapes[3].plane[5] = vec4(0., 0., -1., -r);
+    uShapes[3].plane[0] = vec4(-r3,-r3,-r3,-r);
+    uShapes[3].plane[1] = vec4(-r3,-r3,+r3,-r);
+    uShapes[3].plane[2] = vec4(-r3,+r3,-r3,-r);
+    uShapes[3].plane[3] = vec4(-r3,+r3,+r3,-r);
+    uShapes[3].plane[4] = vec4(+r3,-r3,-r3,-r);
+    uShapes[3].plane[5] = vec4(+r3,-r3,+r3,-r);
+    uShapes[3].plane[6] = vec4(+r3,+r3,-r3,-r);
+    uShapes[3].plane[7] = vec4(+r3,+r3,+r3,-r);
 
     // state.uMaterialsLoc[1]={};
     // gl.uniform3fv(state.uMaterialsLoc[1].ambient,[.1,.1,0.]);
@@ -125,6 +146,14 @@ void init(){
     uMaterials[2].reflectc=vec3(0.4, 0.4, 0.4);
     uMaterials[2].transparent = vec3(0.4, 0.4, 0.4);
     uMaterials[2].refraction=1.5;
+
+    uMaterials[3].ambient=vec3(.1,.1,0.);
+    uMaterials[3].diffuse=vec3(0.098, 0.2549, 0.4);
+    uMaterials[3].specular=vec3(1.,1.,1.);
+    uMaterials[3].power=20.;
+    uMaterials[3].reflectc=vec3(0.4, 0.4, 0.4);
+    uMaterials[3].transparent = vec3(0.4, 0.4, 0.4);
+    uMaterials[3].refraction=1.5;
 
 
     lights[0].rgb = vec3(1., 1., 1.); 
