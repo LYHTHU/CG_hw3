@@ -144,13 +144,13 @@ void init(){
     uMaterials[2].transparent = vec3(0.4, 0.4, 0.4);
     uMaterials[2].refraction=1.5;
 
-    uMaterials[3].ambient=vec3(0.0, 0.0471, 0.098);
+    uMaterials[3].ambient=vec3(0.0, 0.25, 0.5);
     uMaterials[3].diffuse=vec3(0.098, 0.2549, 0.4);
     uMaterials[3].specular=vec3(1.,1.,1.);
     uMaterials[3].power=20.;
     uMaterials[3].reflectc=vec3(0.4, 0.4, 0.4);
-    uMaterials[3].transparent = vec3(1., 1., 1.);
-    uMaterials[3].refraction=1.5;
+    uMaterials[3].transparent = vec3(0.4, 0.4, 0.4);
+    uMaterials[3].refraction=2.0;
 
 
     lights[0].rgb = vec3(1., 1., 1.); 
@@ -177,9 +177,9 @@ vec3 get_normal(Shape s, vec3 pos, int idx){
 
 }
 
-vec3 intersect(Ray r,  Shape s){
+vec4 intersect(Ray r,  Shape s){
     float t;
-    float idx = -1.; 
+    float idx = -1., idx2 = -1.; 
     r.src = r.src - s.center;
     s.center = vec3(0., 0., 0.);
     switch(s.type)
@@ -194,18 +194,18 @@ vec3 intersect(Ray r,  Shape s){
             float delta = pow(dc_s, 2.) - d2*(dot(c_s, c_s) - r2); 
             if(delta < 0.){
                 // no intersect
-                return vec3(-1., -2., idx); 
+                return vec4(-1., -2., idx, idx2); 
             }
             else if(delta > eps){
                 // two intersect
                 float t1 = (dc_s - sqrt(delta))/d2; 
                 float t2 = (dc_s + sqrt(delta))/d2; 
-                return vec3(t1, t2, idx);
+                return vec4(t1, t2, idx, idx2);
             }
             else{
                 // one intersect
                 t = dc_s/d2; 
-                return vec3(t, t, idx); 
+                return vec4(t, t, idx, idx2); 
             }
             break;
         default:
@@ -232,14 +232,15 @@ vec3 intersect(Ray r,  Shape s){
                         t = -p_src / p_dir;
                         if(t > 0. && t < t_max ){
                             t_max = t;
+                            idx2 = float(i);
                         }
                     }
                 }
             }
             if (!case1)
-                return vec3(t_min, t_max, idx);
+                return vec4(t_min, t_max, idx, idx2);
             else {
-                return vec3(-1., -2., -1.);
+                return vec4(-1., -2., -1., -1.);
             }
     }
 }
@@ -265,7 +266,7 @@ bool hidden_by_shape(Light l){
             return true; 
         }
         
-        vec3 t = intersect(ray, uShapes[i]); 
+        vec4 t = intersect(ray, uShapes[i]); 
         if(t[1] > t[0] && t[0] > 0. && t[0] < length(l.src - eye)){
             return true; 
         }
@@ -299,13 +300,13 @@ Ray refract_out_ray(Ray r, Shape s, float refraction, int idx_p) {
     // output: ray outward the surface(keep the same direction)
     vec3 norm = get_normal(s, r.src, idx_p);
     Ray rin = refract_ray(r, norm, refraction);
-    vec3 t = intersect(rin, s);
+    vec4 t = intersect(rin, s);
     Ray ret;
-    if (t[1] >= t[0]) {
+    if (t[1] >= t[0] && t[1] > 0. && t[0] > 0.) {
         // has intersection
         float t1 = t[1];
         vec3 out_point = rin.src + t1*rin.dir;
-        vec3 norm2 = get_normal(s, out_point, int(t[2]));
+        vec3 norm2 = get_normal(s, out_point, int(t[3]));
         Ray ro;
         ro.src = out_point;
         ro.dir = -rin.dir;
@@ -320,7 +321,7 @@ bool is_in_shadow(vec3 pos, vec3 norm, Light light){
     bool ret = false; 
     Ray ray_l = get_ray(pos, light.src); 
     for(int j = 0; j < NS; j++){
-        vec3 t = intersect(ray_l, uShapes[j]);
+        vec4 t = intersect(ray_l, uShapes[j]);
         if(t[1] > t[0] && t[0] > 0.){
             return true; 
         }
@@ -371,7 +372,7 @@ vec3 ray_tracing(){
     float t_min = 10000.; 
     int index =  -1; 
     int idx_p = -1;
-    vec3 t;
+    vec4 t;
     float tmp = 10001.;
     for(int i = 0; i < NS; i++){
         t = intersect(ray, uShapes[i]); 
@@ -399,21 +400,19 @@ vec3 ray_tracing(){
 
         // First level reflection.
         Ray r_out = reflect_ray(r_in, N);
-        vec3 tr;
+        vec4 tr;
         float tmpr = 10001.;
         float t_minr = 10000.; 
         int idx_pr = -1;
         int indexr = -1;
         for(int j = 0; j < NS; j++){
             tr = intersect(r_out, uShapes[j]); 
-            if (tr[1] >= tr[0]) {
-                if(tr[0] >= 0.){
-                    tmpr = tr[0];
-                    if(tmpr < t_minr) {
-                        t_minr = tmpr;
-                        indexr = j;
-                        idx_pr = int(tr[2]);
-                    }
+            if (tr[1] >= tr[0] && tr[0] >= 0.) {
+                tmpr = tr[0];
+                if(tmpr < t_minr) {
+                    t_minr = tmpr;
+                    indexr = j;
+                    idx_pr = int(tr[2]);
                 }
             }
         }
@@ -425,7 +424,7 @@ vec3 ray_tracing(){
 
         // First level refraction.
         Ray ra = refract_out_ray(r_in, uShapes[index], uMaterials[index].refraction, idx_p);
-        vec3 ta;
+        vec4 ta;
         float tmpa = 10001.;
         float t_mina = 10000.; 
         int idx_pa = -1;
@@ -433,21 +432,21 @@ vec3 ray_tracing(){
 
         for(int j = 0; j < NS; j++){
             ta = intersect(ra, uShapes[j]); 
-            if (ta[1] >= ta[0]) {
-                if(ta[0] >= 0.){
-                    tmpa = ta[0];
-                    if(tmpa < t_mina) {
-                        t_mina = tmpa;
-                        indexa = j;
-                        idx_pa = int(ta[2]);
-                    }
+            if (ta[1] >= ta[0] && ta[0] >= 0.) {
+                tmpa = ta[0];
+                if(tmpa < t_mina) {
+                    t_mina = tmpa;
+                    indexa = j;
+                    idx_pa = int(ta[2]);
                 }
+                
             }
         }
 
         if(indexa > -1) {
             vec3 inter_point_a = ra.src + t_mina*ra.dir; 
             color += uMaterials[index].transparent * phong(inter_point_a, indexa, idx_pa);
+
         }
     }
     
