@@ -211,15 +211,16 @@ vec3 intersect(Ray r,  Shape s){
         default:
         // All Polyhedron
             // find the biggest t, when P*v > 0 at the begining
-            float t_min = -10000., t_max = 10000.0;
+            float t_min = -100000000., t_max = 100000000.0;
             float p_src = 0., p_dir = 0.;
             for (int i = 0; i < s.n_p; i++) {
                 p_dir = dot(vec4(r.dir, 0.), s.plane[i]);
                 p_src = dot(vec4(r.src, 1.), s.plane[i]);
-                if (p_dir != 0.) {
+
+                if (abs(p_dir) > 1.e-7) {
                     if(p_src >= 0.) {
                         t = -p_src / p_dir;
-                        if (t > t_min) {
+                        if (t > 0. && t>t_min) {
                             t_min = t;
                             idx = float(i);
                         }
@@ -227,7 +228,7 @@ vec3 intersect(Ray r,  Shape s){
                     else {
                         // < 0
                         t = -p_src / p_dir;
-                        if(t < t_max){
+                        if(t > 0. && t < t_max ){
                             t_max = t;
                         }
                     }
