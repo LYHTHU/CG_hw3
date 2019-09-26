@@ -77,13 +77,13 @@ void init(){
     uShapes[1].type=0;
  
 
-    uShapes[2].center = vec3(-1.*sin(2.*uTime), -0.1, -1.);
-    // uShapes[2].center=vec3(-1.,-.1,-1.);
+    uShapes[2].center = vec3(-1.*sin(2.*uTime), -1.*cos(2.*uTime), 1.);
+    // uShapes[2].center = vec3(-0.2, +1., 1.);
     uShapes[2].r=0.3;
     uShapes[2].n_p = 8;
     uShapes[2].type = 1;
 
-    uShapes[3].center = vec3(0.6*cos(uTime), 0.7, 0.);
+    uShapes[3].center = vec3(0.6*cos(uTime), 0., 0.6*sin(uTime) + 0.6);
     // uShapes[3].center=vec3(0.1 , -0.5, 1.5);
     uShapes[3].r= 0.3;
     uShapes[3].n_p = 6;
@@ -136,11 +136,11 @@ void init(){
     uMaterials[1].refraction = 1.5;
 
 
-    uMaterials[2].ambient=vec3(.1,.1,0.);
+    uMaterials[2].ambient = vec3(.1,.1,0.);
     uMaterials[2].diffuse=vec3(.4,.1,0.3);
-    uMaterials[2].specular=vec3(1.,1.,1.);
+    uMaterials[2].specular = vec3(1.,1.,1.);
     uMaterials[2].power=20.;
-    uMaterials[2].reflectc=vec3(0.4, 0.4, 0.4);
+    uMaterials[2].reflectc = vec3(0.4, 0.4, 0.4);
     uMaterials[2].transparent = vec3(0.4, 0.4, 0.4);
     uMaterials[2].refraction=1.5;
 
@@ -149,8 +149,8 @@ void init(){
     uMaterials[3].specular=vec3(1.,1.,1.);
     uMaterials[3].power=20.;
     uMaterials[3].reflectc=vec3(0.4, 0.4, 0.4);
-    uMaterials[3].transparent = vec3(0.4, 0.4, 0.4);
-    uMaterials[3].refraction=2.0;
+    uMaterials[3].transparent = vec3(1., 1., 1.);
+    uMaterials[3].refraction=1.5;
 
 
     lights[0].rgb = vec3(1., 1., 1.); 
@@ -283,7 +283,7 @@ Ray reflect_ray(Ray rin, vec3 norm){
 
 Ray refract_ray(Ray rin, vec3 norm, float refraction) {
     Ray ret; 
-    ret.src = rin.src + 0.00001 * norm;
+    ret.src = rin.src + 0.0001 * norm;
     vec3 wn = dot(rin.dir, norm) * norm;
     vec3 ws = rin.dir - wn;
 
