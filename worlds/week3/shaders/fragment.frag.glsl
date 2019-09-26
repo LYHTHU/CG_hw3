@@ -213,6 +213,7 @@ vec3 intersect(Ray r,  Shape s){
             // find the biggest t, when P*v > 0 at the begining
             float t_min = -100000000., t_max = 100000000.0;
             float p_src = 0., p_dir = 0.;
+            bool case1 = false;
             for (int i = 0; i < s.n_p; i++) {
                 p_dir = dot(vec4(r.dir, 0.), s.plane[i]);
                 p_src = dot(vec4(r.src, 1.), s.plane[i]);
@@ -220,6 +221,7 @@ vec3 intersect(Ray r,  Shape s){
                 if (abs(p_dir) > 1.e-7) {
                     if(p_src >= 0.) {
                         t = -p_src / p_dir;
+                        if (t < 0.) case1 = true;
                         if (t > 0. && t>t_min) {
                             t_min = t;
                             idx = float(i);
@@ -234,8 +236,11 @@ vec3 intersect(Ray r,  Shape s){
                     }
                 }
             }
-
-            return vec3(t_min, t_max, idx);
+            if (!case1)
+                return vec3(t_min, t_max, idx);
+            else {
+                return vec3(-1., -2., -1.);
+            }
     }
 }
 
