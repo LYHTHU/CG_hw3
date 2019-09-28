@@ -81,6 +81,10 @@ async function setup(state) {
                     state.uShapesLoc[i].r = gl.getUniformLocation(program, 'uShapes[' + i + '].r');
                     state.uShapesLoc[i].type = gl.getUniformLocation(program, 'uShapes[' + i + '].type');
                     state.uShapesLoc[i].n_p = gl.getUniformLocation(program, 'uShapes[' + i + '].n_p');
+                    state.uShapesLoc[i].planeLoc = []
+                    for (var j = 0; j < 10; j++) {
+                        state.uShapesLoc[i].planeLoc[j] = gl.getUniformLocation(program, 'uShapes[' + i + '].plane[' + j + ']');
+                    }
                 }
 
                 state.lightsLoc = [];                
@@ -88,7 +92,6 @@ async function setup(state) {
                     state.lightsLoc[i] = {};
                     state.lightsLoc[i].src = gl.getUniformLocation(program, 'lights[' + i + '].src');
                     state.lightsLoc[i].rgb = gl.getUniformLocation(program, 'lights[' + i + '].rgb');
-
                 }
 
             } 
@@ -178,6 +181,48 @@ function onStartFrame(t, state) {
     gl.uniform3fv(state.uMaterialsLoc[3].reflectc , [0.4, 0.4, 0.4]);
     gl.uniform3fv(state.uMaterialsLoc[3].transparent, [0.4, 0.4, 0.4]);
     gl.uniform1f (state.uMaterialsLoc[3].refraction   , 2.0);
+
+    gl.uniform3fv(state.uShapesLoc[0].center, [1.0*Math.cos(2.*time), 1.0*Math.sin(2.*time), -3.*Math.sin(time)]);
+    gl.uniform1f (state.uShapesLoc[0].r, 0.6);
+    gl.uniform1i (state.uShapesLoc[0].type, 0);
+    gl.uniform1i (state.uShapesLoc[0].n_p, 0);
+
+    gl.uniform3fv(state.uShapesLoc[1].center, [-.5, 1.2, -0.4]);
+    gl.uniform1f (state.uShapesLoc[1].r, 0.7);
+    gl.uniform1i (state.uShapesLoc[1].type, 0);
+    gl.uniform1i (state.uShapesLoc[1].n_p, 0);
+
+    var r3 = 1.0 / Math.sqrt(3);
+    var r = 0.2;
+
+    gl.uniform3fv(state.uShapesLoc[2].center, [-1.*Math.sin(2.*time), -1.*Math.cos(2.*time), 1.]);
+    gl.uniform1f (state.uShapesLoc[2].r, 0.3);
+    gl.uniform1i (state.uShapesLoc[2].type, 1);
+    gl.uniform1i (state.uShapesLoc[2].n_p, 8);
+
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[0], [-r3,-r3,-r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[1], [-r3,-r3,+r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[2], [-r3,+r3,-r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[3], [-r3,+r3,+r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[4], [+r3,-r3,-r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[5], [+r3,-r3,+r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[6], [+r3,+r3,-r3,-r]);
+    gl.uniform4fv(state.uShapesLoc[2].planeLoc[7], [+r3,+r3,+r3,-r]);
+
+
+
+    gl.uniform3fv(state.uShapesLoc[3].center, [0.6*Math.cos(time), 0., 0.6*Math.sin(time) + 0.6]);
+    gl.uniform1f (state.uShapesLoc[3].r, 0.3);
+    gl.uniform1i (state.uShapesLoc[3].type, 1);
+    gl.uniform1i (state.uShapesLoc[3].n_p, 6);
+
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[0], [1. , 0., 0., -r]);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[1], [-1. , 0., 0., -r]);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[2], [0. , 1., 0., -r]);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[3], [0. , -1., 0., -r]);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[4], [0. , 0., 1., -r]);
+    gl.uniform4fv(state.uShapesLoc[3].planeLoc[5], [0. , 0., -1., -r]);
+
 
     gl.uniform3fv(state.lightsLoc[0].src, [2.*Math.sin(time), 2.*Math.cos(time), -.5]);
     gl.uniform3fv(state.lightsLoc[0].rgb, [1., 1., 1.]);
