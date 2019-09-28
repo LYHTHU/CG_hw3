@@ -59,6 +59,9 @@ async function setup(state) {
                 state.uProjLoc         = gl.getUniformLocation(program, 'uProj');
                 state.uTimeLoc         = gl.getUniformLocation(program, 'uTime');
 
+                state.eyeLoc           = gl.getUniformLocation(program, 'eye');
+                state.screenCenterLoc           = gl.getUniformLocation(program, 'screen_center');
+
                 state.uMaterialsLoc = []
                 state.uMaterialsLoc[0] = {};
                 state.uMaterialsLoc[0].diffuse  = gl.getUniformLocation(program, 'uMaterials[0].diffuse');
@@ -95,6 +98,21 @@ async function setup(state) {
                 state.uMaterialsLoc[3].reflectc = gl.getUniformLocation(program, 'uMaterials[3].reflectc');
                 state.uMaterialsLoc[3].refraction = gl.getUniformLocation(program, 'uMaterials[3].refraction');
                 state.uMaterialsLoc[3].transparent = gl.getUniformLocation(program, 'uMaterials[3].transparent');
+                
+                state.lightsLoc = [];
+                
+                state.lightsLoc[0]  = {};
+                state.lightsLoc[0].src = gl.getUniformLocation(program, 'lights[0].src');
+                state.lightsLoc[0].rgb = gl.getUniformLocation(program, 'lights[0].rgb');
+
+                state.lightsLoc[1]  = {};
+                state.lightsLoc[1].src = gl.getUniformLocation(program, 'lights[1].src');
+                state.lightsLoc[1].rgb = gl.getUniformLocation(program, 'lights[1].rgb');
+
+
+                state.lightsLoc[2]  = {};
+                state.lightsLoc[2].src = gl.getUniformLocation(program, 'lights[2].src');
+                state.lightsLoc[2].rgb = gl.getUniformLocation(program, 'lights[2].rgb');
             } 
         },
         {
@@ -148,6 +166,9 @@ function onStartFrame(t, state) {
 
     gl.uniform1f(state.uTimeLoc, time);
 
+    gl.uniform3fv(state.eyeLoc, [0., 0., 5.]);
+    gl.uniform3fv(state.screenCenterLoc, [0., 0., 2.5]);
+
     gl.uniform3fv(state.uMaterialsLoc[0].ambient , [0.,.1,.1]);
     gl.uniform3fv(state.uMaterialsLoc[0].diffuse , [0.,.5,.5]);
     gl.uniform3fv(state.uMaterialsLoc[0].specular, [0.,1.,1.]);
@@ -179,6 +200,15 @@ function onStartFrame(t, state) {
     gl.uniform3fv(state.uMaterialsLoc[3].reflectc , [0.4, 0.4, 0.4]);
     gl.uniform3fv(state.uMaterialsLoc[3].transparent, [0.4, 0.4, 0.4]);
     gl.uniform1f (state.uMaterialsLoc[3].refraction   , 2.0);
+
+    gl.uniform3fv(state.lightsLoc[0].src, [2.*Math.sin(time), 2.*Math.cos(time), -.5]);
+    gl.uniform3fv(state.lightsLoc[0].rgb, [1., 1., 1.]);
+
+    gl.uniform3fv(state.lightsLoc[1].src, [-1.5*Math.cos(time), 0., 1.5*Math.sin(time)]);
+    gl.uniform3fv(state.lightsLoc[1].rgb, [1., 1., 1.]);
+
+    gl.uniform3fv(state.lightsLoc[2].src, [0., 1.*Math.cos(time), 1.*Math.sin(time)]);
+    gl.uniform3fv(state.lightsLoc[2].rgb, [1., 1., 1.]);
 
 
     gl.enable(gl.DEPTH_TEST);

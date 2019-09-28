@@ -8,8 +8,8 @@ out vec4 fragColor; // RESULT WILL GO HERE
 const int NS = 4; // Number of uShapes in the scene
 const int NL = 3; // Number of light sources in the scene
 const float eps = 1.e-7; 
-const vec3 eye = vec3(0., 0., 5.); 
-const vec3 screen_center = vec3(0., 0., 2.5); 
+uniform vec3 eye ; 
+uniform vec3 screen_center; 
 
 struct Shape{
     int type;
@@ -43,7 +43,7 @@ struct Light{
 
 Shape uShapes[NS];
 uniform Material uMaterials[NS];
-Light lights[NL];
+uniform Light lights[NL];
 
 
 Ray get_ray(vec3 p_src, vec3 p_dest){
@@ -104,15 +104,6 @@ void init(){
     uShapes[3].plane[3] = vec4(0. ,-1., 0., -r);
     uShapes[3].plane[4] = vec4(0. , 0., 1., -r);
     uShapes[3].plane[5] = vec4(0. , 0.,-1., -r);
-
-
-
-    lights[0].rgb = vec3(1., 1., 1.); 
-    lights[0].src = vec3(2.*sin(uTime), 2.*cos(uTime), -.5); 
-    lights[1].rgb = vec3(1., 1., 1.); 
-    lights[1].src = vec3(-1.5*cos(uTime), 0., 1.5*sin(uTime)); 
-    lights[2].rgb = vec3(1., 1., 1.); 
-    lights[2].src = vec3(0., 1.*cos(uTime), 1.*sin(uTime));
 }
 
 vec3 get_normal(Shape s, vec3 pos, int idx){
