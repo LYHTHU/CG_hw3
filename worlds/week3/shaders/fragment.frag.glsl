@@ -42,7 +42,7 @@ struct Light{
 }; 
 
 Shape uShapes[NS];
-Material uMaterials[NS];
+uniform Material uMaterials[NS];
 Light lights[NL];
 
 
@@ -56,12 +56,7 @@ Ray get_ray(vec3 p_src, vec3 p_dest){
 // Setting the parameters of uShapes and lights
 void init(){
     // x,  y:  - 2 ~ 2,  z: 0~4
-    // state.uMaterialsLoc=[];
-    // state.uMaterialsLoc[0]={};
-    // state.uMaterialsLoc[0].diffuse=gl.getUniformLocation(program,'uMaterials[0].diffuse');
-    // state.uMaterialsLoc[0].ambient=gl.getUniformLocation(program,'uMaterials[0].ambient');
-    // state.uMaterialsLoc[0].specular=gl.getUniformLocation(program,'uMaterials[0].specular');
-    // state.uMaterialsLoc[0].power=gl.getUniformLocation(program,'uMaterials[0].power');
+
     // gl.uniform3fv(state.uMaterialsLoc[0].ambient,[.05, 0, 0]);
     // gl.uniform3fv(state.uMaterialsLoc[0].diffuse,[.5, 0, 0]);
     // gl.uniform3fv(state.uMaterialsLoc[0].specular,[.5, .5, .5]);
@@ -110,47 +105,6 @@ void init(){
     uShapes[3].plane[4] = vec4(0. , 0., 1., -r);
     uShapes[3].plane[5] = vec4(0. , 0.,-1., -r);
 
-
-
-    // state.uMaterialsLoc[1]={};
-    // gl.uniform3fv(state.uMaterialsLoc[1].ambient,[.1,.1,0.]);
-    // gl.uniform3fv(state.uMaterialsLoc[1].diffuse,[.5,.5,0.]);
-    // gl.uniform3fv(state.uMaterialsLoc[1].specular,[1.,1.,1.]);
-    // gl.uniform1f(state.uMaterialsLoc[1].power, 20);
-
-    uMaterials[0].ambient=vec3(0.,.1,.1);
-    uMaterials[0].diffuse=vec3(0.,.5,.5);
-    uMaterials[0].specular=vec3(0.,1.,1.);// 4th value is specular power
-    uMaterials[0].power = 20.;
-    uMaterials[0].reflectc = vec3(0.5,0.5,0.5);
-    uMaterials[0].transparent = vec3(0.5,0.5,0.5);
-    uMaterials[0].refraction = 1.5;
-
-
-    uMaterials[1].ambient=vec3(0.0314, 0.098, 0.0);
-    uMaterials[1].diffuse=vec3(0.05, 0.25, 0.0);
-    uMaterials[1].specular=vec3(1.,1.,1.);
-    uMaterials[1].power=20.;
-    uMaterials[1].reflectc =vec3(0.5, 0.5, 0.5);
-    uMaterials[1].transparent = vec3(0.5, 0.5, 0.5);
-    uMaterials[1].refraction = 1.5;
-
-
-    uMaterials[2].ambient = vec3(.1,.1,0.);
-    uMaterials[2].diffuse=vec3(.4,.1,0.3);
-    uMaterials[2].specular = vec3(1.,1.,1.);
-    uMaterials[2].power=20.;
-    uMaterials[2].reflectc = vec3(0.4, 0.4, 0.4);
-    uMaterials[2].transparent = vec3(0.4, 0.4, 0.4);
-    uMaterials[2].refraction=1.5;
-
-    uMaterials[3].ambient=vec3(0.0, 0.25, 0.5);
-    uMaterials[3].diffuse=vec3(0.098, 0.2549, 0.4);
-    uMaterials[3].specular=vec3(1.,1.,1.);
-    uMaterials[3].power=20.;
-    uMaterials[3].reflectc=vec3(0.4, 0.4, 0.4);
-    uMaterials[3].transparent = vec3(0.4, 0.4, 0.4);
-    uMaterials[3].refraction=2.0;
 
 
     lights[0].rgb = vec3(1., 1., 1.); 
