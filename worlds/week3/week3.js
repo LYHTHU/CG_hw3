@@ -61,58 +61,36 @@ async function setup(state) {
 
                 state.eyeLoc           = gl.getUniformLocation(program, 'eye');
                 state.screenCenterLoc           = gl.getUniformLocation(program, 'screen_center');
-
+                
                 state.uMaterialsLoc = []
-                state.uMaterialsLoc[0] = {};
-                state.uMaterialsLoc[0].diffuse  = gl.getUniformLocation(program, 'uMaterials[0].diffuse');
-                state.uMaterialsLoc[0].ambient  = gl.getUniformLocation(program, 'uMaterials[0].ambient');
-                state.uMaterialsLoc[0].specular = gl.getUniformLocation(program, 'uMaterials[0].specular');
-                state.uMaterialsLoc[0].power    = gl.getUniformLocation(program, 'uMaterials[0].power');
-                state.uMaterialsLoc[0].reflectc = gl.getUniformLocation(program, 'uMaterials[0].reflectc');
-                state.uMaterialsLoc[0].refraction = gl.getUniformLocation(program, 'uMaterials[0].refraction');
-                state.uMaterialsLoc[0].transparent = gl.getUniformLocation(program, 'uMaterials[0].transparent');
-
-                state.uMaterialsLoc[1] = {};
-                state.uMaterialsLoc[1].diffuse  = gl.getUniformLocation(program, 'uMaterials[1].diffuse');
-                state.uMaterialsLoc[1].ambient  = gl.getUniformLocation(program, 'uMaterials[1].ambient');
-                state.uMaterialsLoc[1].specular = gl.getUniformLocation(program, 'uMaterials[1].specular');
-                state.uMaterialsLoc[1].power    = gl.getUniformLocation(program, 'uMaterials[1].power');
-                state.uMaterialsLoc[1].reflectc = gl.getUniformLocation(program, 'uMaterials[1].reflectc');
-                state.uMaterialsLoc[1].refraction = gl.getUniformLocation(program, 'uMaterials[1].refraction');
-                state.uMaterialsLoc[1].transparent = gl.getUniformLocation(program, 'uMaterials[1].transparent');
-
-                state.uMaterialsLoc[2] = {};
-                state.uMaterialsLoc[2].diffuse  = gl.getUniformLocation(program, 'uMaterials[2].diffuse');
-                state.uMaterialsLoc[2].ambient  = gl.getUniformLocation(program, 'uMaterials[2].ambient');
-                state.uMaterialsLoc[2].specular = gl.getUniformLocation(program, 'uMaterials[2].specular');
-                state.uMaterialsLoc[2].power    = gl.getUniformLocation(program, 'uMaterials[2].power');
-                state.uMaterialsLoc[2].reflectc = gl.getUniformLocation(program, 'uMaterials[2].reflectc');
-                state.uMaterialsLoc[2].refraction = gl.getUniformLocation(program, 'uMaterials[2].refraction');
-                state.uMaterialsLoc[2].transparent = gl.getUniformLocation(program, 'uMaterials[2].transparent');
-
-                state.uMaterialsLoc[3] = {};
-                state.uMaterialsLoc[3].diffuse  = gl.getUniformLocation(program, 'uMaterials[3].diffuse');
-                state.uMaterialsLoc[3].ambient  = gl.getUniformLocation(program, 'uMaterials[3].ambient');
-                state.uMaterialsLoc[3].specular = gl.getUniformLocation(program, 'uMaterials[3].specular');
-                state.uMaterialsLoc[3].power    = gl.getUniformLocation(program, 'uMaterials[3].power');
-                state.uMaterialsLoc[3].reflectc = gl.getUniformLocation(program, 'uMaterials[3].reflectc');
-                state.uMaterialsLoc[3].refraction = gl.getUniformLocation(program, 'uMaterials[3].refraction');
-                state.uMaterialsLoc[3].transparent = gl.getUniformLocation(program, 'uMaterials[3].transparent');
+                for (var i = 0; i < 4; i++) {
+                    state.uMaterialsLoc[i] = {};
+                    state.uMaterialsLoc[i].diffuse  = gl.getUniformLocation(program, 'uMaterials[' + i + '].diffuse');
+                    state.uMaterialsLoc[i].ambient  = gl.getUniformLocation(program, 'uMaterials[' + i + '].ambient');
+                    state.uMaterialsLoc[i].specular = gl.getUniformLocation(program, 'uMaterials[' + i + '].specular');
+                    state.uMaterialsLoc[i].power    = gl.getUniformLocation(program, 'uMaterials[' + i + '].power');
+                    state.uMaterialsLoc[i].reflectc = gl.getUniformLocation(program, 'uMaterials[' + i + '].reflectc');
+                    state.uMaterialsLoc[i].refraction = gl.getUniformLocation(program, 'uMaterials[' + i + '].refraction');
+                    state.uMaterialsLoc[i].transparent = gl.getUniformLocation(program, 'uMaterials[' + i + '].transparent');
+                }
                 
-                state.lightsLoc = [];
-                
-                state.lightsLoc[0]  = {};
-                state.lightsLoc[0].src = gl.getUniformLocation(program, 'lights[0].src');
-                state.lightsLoc[0].rgb = gl.getUniformLocation(program, 'lights[0].rgb');
+                state.uShapesLoc = [];
+                for (var i = 0; i <4; i++) {
+                    state.uShapesLoc[i] = {};
+                    state.uShapesLoc[i].center = gl.getUniformLocation(program, 'uShapes[' + i + '].center');
+                    state.uShapesLoc[i].r = gl.getUniformLocation(program, 'uShapes[' + i + '].r');
+                    state.uShapesLoc[i].type = gl.getUniformLocation(program, 'uShapes[' + i + '].type');
+                    state.uShapesLoc[i].n_p = gl.getUniformLocation(program, 'uShapes[' + i + '].n_p');
+                }
 
-                state.lightsLoc[1]  = {};
-                state.lightsLoc[1].src = gl.getUniformLocation(program, 'lights[1].src');
-                state.lightsLoc[1].rgb = gl.getUniformLocation(program, 'lights[1].rgb');
+                state.lightsLoc = [];                
+                for (var i = 0; i < 3; i++) {
+                    state.lightsLoc[i] = {};
+                    state.lightsLoc[i].src = gl.getUniformLocation(program, 'lights[' + i + '].src');
+                    state.lightsLoc[i].rgb = gl.getUniformLocation(program, 'lights[' + i + '].rgb');
 
+                }
 
-                state.lightsLoc[2]  = {};
-                state.lightsLoc[2].src = gl.getUniformLocation(program, 'lights[2].src');
-                state.lightsLoc[2].rgb = gl.getUniformLocation(program, 'lights[2].rgb');
             } 
         },
         {
