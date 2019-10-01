@@ -55,46 +55,6 @@ Ray get_ray(vec3 p_src, vec3 p_dest){
 
 // Setting the parameters of uShapes and lights
 void init(){
-    // x,  y:  - 2 ~ 2,  z: 0~4
-
-    // uShapes[0].center = vec3(1.0*cos(2.*uTime), 1.0*sin(2.*uTime), -3.*sin(uTime)); 
-    // uShapes[0].r = .6; 
-    // uShapes[0].type=0;
-
-    // uShapes[1].center = vec3(-.5, 1.2, -0.4); 
-    // uShapes[1].r = .7;
-    // uShapes[1].type=0;
- 
-
-    // uShapes[2].center = vec3(-1.*sin(2.*uTime), -1.*cos(2.*uTime), 1.);
-    // uShapes[2].r=0.3;
-    // uShapes[2].n_p = 8;
-    // uShapes[2].type = 1;
-
-    // uShapes[3].center = vec3(0.6*cos(uTime), 0., 0.6*sin(uTime) + 0.6);
-    // uShapes[3].r= 0.3;
-    // uShapes[3].n_p = 6;
-    // uShapes[3].type = 1;
-
-    // float r3 = 1./sqrt(3.);
-    // float r = uShapes[2].r;
-
-    // uShapes[2].plane[0] = vec4(-r3,-r3,-r3,-r);
-    // uShapes[2].plane[1] = vec4(-r3,-r3,+r3,-r);
-    // uShapes[2].plane[2] = vec4(-r3,+r3,-r3,-r);
-    // uShapes[2].plane[3] = vec4(-r3,+r3,+r3,-r);
-    // uShapes[2].plane[4] = vec4(+r3,-r3,-r3,-r);
-    // uShapes[2].plane[5] = vec4(+r3,-r3,+r3,-r);
-    // uShapes[2].plane[6] = vec4(+r3,+r3,-r3,-r);
-    // uShapes[2].plane[7] = vec4(+r3,+r3,+r3,-r);
-
-    // r = uShapes[3].r;
-    // uShapes[3].plane[0] = vec4(1. , 0., 0., -r);
-    // uShapes[3].plane[1] = vec4(-1., 0., 0., -r);
-    // uShapes[3].plane[2] = vec4(0. , 1., 0., -r);
-    // uShapes[3].plane[3] = vec4(0. ,-1., 0., -r);
-    // uShapes[3].plane[4] = vec4(0. , 0., 1., -r);
-    // uShapes[3].plane[5] = vec4(0. , 0.,-1., -r);
 }
 
 vec3 get_normal(Shape s, vec3 pos, int idx){
